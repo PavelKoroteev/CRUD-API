@@ -7,7 +7,9 @@ import { createOne } from './controllers/users/createOne';
 import { updateOne } from './controllers/users/updateOne';
 import { deleteOne } from './controllers/users/deleteOne';
 
-const ROUTES = {
+import { Controller } from './types';
+
+const ROUTES: Record<string, Controller>  = {
     // Implemented endpoint api/users:
     'GET api/users': getAll, // is used to get all persons
     // Server should answer with status code 200 and all users records
@@ -18,7 +20,7 @@ const ROUTES = {
     'POST api/users': createOne, // is used to create record about new user and store it in database
     // Server should answer with status code 201 and newly created record
     // Server should answer with status code 400 and corresponding message if request body does not contain required fields
-    'PUT api/users/{userId}': updateOne, // is used to update existing user
+    'PUT api/users/${userId}': updateOne, // is used to update existing user
     // Server should answer with status code 200 and updated record
     // Server should answer with status code 400 and corresponding message if userId is invalid (not uuid)
     // Server should answer with status code 404 and corresponding message if record with id === userId doesn't exist
@@ -28,8 +30,59 @@ const ROUTES = {
     // Server should answer with status code 404 and corresponding message if record with id === userId doesn't exist
 };
 
-http.createServer((req, res) => {
+const FORWARD_SLASH_REGEXP = /\//g;
+const FORWARD_SLASH_PATTERN = '\/';
+
+const escape = (pattern: string) => {
+    return pattern.replace(FORWARD_SLASH_REGEXP, FORWARD_SLASH_PATTERN);
+}
+
+const PLACEHOLDER_REGEXP = /\${.+}/g;
+const PLACEHOLDER_PATTERN = '(.+)';
+
+const generateRegexp = (path: string) => {
+    const escapedPath = escape(path);
+
+    const pattern = escapedPath.replace(PLACEHOLDER_REGEXP, PLACEHOLDER_PATTERN);
+
+    return new RegExp(`\/${pattern}`);
+}
+
+const routes = Object.entries(ROUTES).map(([description, controller]) => {
+    const [method, path] = description.split(' ');
+
+    return {
+        method,
+        regexp: generateRegexp(path),
+        callback: controller,
+        priority: path.length,
+    }
+});
+
+http.createServer((request, response) => {
+    const { url } = request;
+
+    if (!url) {
+        console.error('Request has no url');
+        response.writeHead(404);
+        response.end();
+        return;
+    }
     
+    const foundRoutes = routes.filter(({ method, regexp }) => request.method === method && regexp.test(url));
+
+    if (foundRoutes.length) {
+        const found = foundRoutes.sort((a,b) => b.priority - a.priority)[0];
+
+        const { regexp, callback, } = found;
+
+        const [, argument] = regexp.exec(url)!;
+
+        callback(request, response, argument);
+    } else {
+        response.writeHead(404);
+        response.end();
+    }
 }).listen(8080, () => {
     console.log('Listening...');
 })
