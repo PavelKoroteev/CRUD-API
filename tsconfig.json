@@ -5,5 +5,8 @@
         "target": "es2020",
         "moduleResolution": "node"
     },
+    "ts-node": {
+        "esm": true
+    },
     "files": ["src/index.ts"]
 }

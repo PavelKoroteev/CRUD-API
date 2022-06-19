@@ -15,8 +15,6 @@ export const createOne: Controller = async (req, res) => {
 
     database.set(uuid, user);
 
-    console.log(database);
-
     res.writeHead(201);
     res.end(JSON.stringify(Object.assign(user, { id: uuid })));
 };

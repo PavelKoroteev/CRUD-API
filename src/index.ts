@@ -40,19 +40,7 @@ const routes = Object.entries(ROUTES).map(([description, controller]) => {
     };
 });
 
-http.createServer((request, response) => {
-    process.on('uncaughtException', (err) => {
-        console.error(err);
-        response.writeHead(500);
-        response.end();
-    });
-
-    process.on('unhandledRejection', (reason) => {
-        console.log(reason);
-        response.writeHead(500);
-        response.end();
-    });
-
+http.createServer(async (request, response) => {
     const { url } = request;
 
     if (!url) {
@@ -73,7 +61,12 @@ http.createServer((request, response) => {
 
         const [, argument] = regexp.exec(url)!;
 
-        callback(request, response, argument);
+        try {
+            await callback(request, response, argument);
+        } catch(e) {
+            response.writeHead(500);
+            response.end();
+        }
     } else {
         response.writeHead(404);
         response.end();
