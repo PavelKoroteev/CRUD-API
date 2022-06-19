@@ -1,4 +1,4 @@
-import http from 'http';
+import * as http from 'http';
 import { User } from '../types';
 import { assertUser } from './assertUser';
 
@@ -7,13 +7,16 @@ import { assertUser } from './assertUser';
 const ERROR_CODE = 400;
 const ERROR_MESSAGE = 'User serializer error, invalid JSON';
 
-export async function getUserFromBody(req: http.IncomingMessage, res: http.ServerResponse) {
+export async function getUserFromBody(
+    req: http.IncomingMessage,
+    res: http.ServerResponse
+) {
     const buffers: Uint8Array[] = [];
 
     for await (const chunk of req) {
-      buffers.push(chunk);
+        buffers.push(chunk);
     }
-  
+
     const data = Buffer.concat(buffers).toString();
 
     let userJson;

@@ -19,11 +19,12 @@ export const updateOne: Controller = async (req, res, uuid) => {
 
     Object.keys(copy).forEach((key: keyof typeof copy) => {
         const updatedValue = updateFields[key];
-        if (typeof updatedValue === 'undefined') { // bug if user has nullish values
+        if (typeof updatedValue === 'undefined') {
+            // bug if user has nullish values
             return;
         }
         copy[key] = updatedValue;
-    })
+    });
 
     assertUser(res, copy);
 

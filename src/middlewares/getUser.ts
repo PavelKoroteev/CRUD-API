@@ -1,11 +1,15 @@
-import http from 'http';
+import * as http from 'http';
 import { database } from '../database';
 import { User } from '../types';
 
 const ERROR_CODE = 404;
-const ERROR_MESSAGE = 'Record with id === userId doesn\'t exist';
+const ERROR_MESSAGE = "Record with id === userId doesn't exist";
 
-export function getUser(request: http.IncomingMessage, response: http.ServerResponse, uuid: string): User {
+export function getUser(
+    request: http.IncomingMessage,
+    response: http.ServerResponse,
+    uuid: string
+): User {
     const user = database.get(uuid);
 
     if (!user) {

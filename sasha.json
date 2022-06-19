@@ -1,7 +1,5 @@
 {
     "age": 35,
     "username": "Sasha",
-    "hobbies": [
-        "coockies", "cakes", "chocolate"
-    ]
+    "hobbies": ["coockies", "cakes", "chocolate"]
 }

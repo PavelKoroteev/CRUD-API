@@ -1,4 +1,4 @@
-import http from 'http';
+import * as http from 'http';
 import { config } from 'dotenv';
 
 import { getAll } from './controllers/users/getAll';
@@ -21,7 +21,7 @@ process.on('unhandledRejection', (reason) => {
 
 config();
 
-const ROUTES: Record<string, Controller>  = {
+const ROUTES: Record<string, Controller> = {
     'GET api/users': getAll,
     'GET api/users/${userId}': getOne,
     'POST api/users': createOne,
@@ -37,7 +37,7 @@ const routes = Object.entries(ROUTES).map(([description, controller]) => {
         regexp: generateRegexpByPath(path),
         callback: controller,
         priority: path.length,
-    }
+    };
 });
 
 http.createServer((request, response) => {
@@ -46,7 +46,7 @@ http.createServer((request, response) => {
         response.writeHead(500);
         response.end();
     });
-    
+
     process.on('unhandledRejection', (reason) => {
         console.log(reason);
         response.writeHead(500);
@@ -62,12 +62,14 @@ http.createServer((request, response) => {
         return;
     }
 
-    const foundRoutes = routes.filter(({ method, regexp }) => request.method === method && regexp.test(url));
+    const foundRoutes = routes.filter(
+        ({ method, regexp }) => request.method === method && regexp.test(url)
+    );
 
     if (foundRoutes.length) {
-        const found = foundRoutes.sort((a,b) => b.priority - a.priority)[0];
+        const found = foundRoutes.sort((a, b) => b.priority - a.priority)[0];
 
-        const { regexp, callback, } = found;
+        const { regexp, callback } = found;
 
         const [, argument] = regexp.exec(url)!;
 
@@ -78,4 +80,4 @@ http.createServer((request, response) => {
     }
 }).listen(process.env.PORT, () => {
     console.log('Listening...', process.env.PORT);
-})
+});
