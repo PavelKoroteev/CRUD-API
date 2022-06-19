@@ -5,7 +5,13 @@
   "main": "src/index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon src/index.ts"
+    "start:dev": "nodemon src/index.ts",
+    "start:prod": "tsc src/index.ts dist",
+    "debug": "nodemon --exec 'node --inspect=0.0.0.0:9229 --require ts-node/register src/index.ts'",
+    "create": "curl -i -X POST localhost:8080/api/users",
+    "create:sasha": "npm run curl -- -X POST --data \"@sasha.json\"",
+    "create:misha": "npm run curl -- -X POST --data \"@misha.json\"",
+    "curl": "curl -i localhost:8080/api/users"
   },
   "repository": {
     "type": "git",
@@ -22,6 +28,7 @@
   },
   "homepage": "https://github.com/PavelKoroteev/CRUD-API#readme",
   "devDependencies": {
+    "@types/uuid": "^8.3.4",
     "cross-env": "^7.0.3",
     "eslint": "^8.18.0",
     "nodemon": "^2.0.16",

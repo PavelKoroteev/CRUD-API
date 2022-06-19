@@ -1,5 +1,6 @@
 import http from 'http';
 // import { router } from './router/index.js';
+import { config } from 'dotenv';
 
 import { getAll } from './controllers/users/getAll';
 import { getOne } from './controllers/users/getOne';
@@ -9,17 +10,21 @@ import { deleteOne } from './controllers/users/deleteOne';
 
 import { Controller } from './types';
 
+process.on('uncaughtException', (err) => {
+    console.error(err);
+});
+
+process.on('unhandledRejection', (reason) => {
+    console.log(reason);
+});
+
+config();
+
 const ROUTES: Record<string, Controller>  = {
     // Implemented endpoint api/users:
     'GET api/users': getAll, // is used to get all persons
-    // Server should answer with status code 200 and all users records
     'GET api/users/${userId}': getOne,
-    // Server should answer with status code 200 and and record with id === userId if it exists
-    // Server should answer with status code 400 and corresponding message if userId is invalid (not uuid)
-    // Server should answer with status code 404 and corresponding message if record with id === userId doesn't exist
     'POST api/users': createOne, // is used to create record about new user and store it in database
-    // Server should answer with status code 201 and newly created record
-    // Server should answer with status code 400 and corresponding message if request body does not contain required fields
     'PUT api/users/${userId}': updateOne, // is used to update existing user
     // Server should answer with status code 200 and updated record
     // Server should answer with status code 400 and corresponding message if userId is invalid (not uuid)
@@ -60,6 +65,18 @@ const routes = Object.entries(ROUTES).map(([description, controller]) => {
 });
 
 http.createServer((request, response) => {
+    process.on('uncaughtException', (err) => {
+        console.error(err);
+        response.writeHead(500);
+        response.end();
+    });
+    
+    process.on('unhandledRejection', (reason) => {
+        console.log(reason);
+        response.writeHead(500);
+        response.end();
+    });
+
     const { url } = request;
 
     if (!url) {
@@ -68,7 +85,7 @@ http.createServer((request, response) => {
         response.end();
         return;
     }
-    
+
     const foundRoutes = routes.filter(({ method, regexp }) => request.method === method && regexp.test(url));
 
     if (foundRoutes.length) {
@@ -83,6 +100,6 @@ http.createServer((request, response) => {
         response.writeHead(404);
         response.end();
     }
-}).listen(8080, () => {
-    console.log('Listening...');
+}).listen(process.env.PORT, () => {
+    console.log('Listening...', process.env.PORT);
 })
