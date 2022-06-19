@@ -1,5 +1,4 @@
 import http from 'http';
-// import { router } from './router/index.js';
 import { config } from 'dotenv';
 
 import { getAll } from './controllers/users/getAll';
@@ -7,6 +6,8 @@ import { getOne } from './controllers/users/getOne';
 import { createOne } from './controllers/users/createOne';
 import { updateOne } from './controllers/users/updateOne';
 import { deleteOne } from './controllers/users/deleteOne';
+
+import { generateRegexpByPath } from './utils/regexp';
 
 import { Controller } from './types';
 
@@ -21,44 +22,19 @@ process.on('unhandledRejection', (reason) => {
 config();
 
 const ROUTES: Record<string, Controller>  = {
-    // Implemented endpoint api/users:
-    'GET api/users': getAll, // is used to get all persons
+    'GET api/users': getAll,
     'GET api/users/${userId}': getOne,
-    'POST api/users': createOne, // is used to create record about new user and store it in database
-    'PUT api/users/${userId}': updateOne, // is used to update existing user
-    // Server should answer with status code 200 and updated record
-    // Server should answer with status code 400 and corresponding message if userId is invalid (not uuid)
-    // Server should answer with status code 404 and corresponding message if record with id === userId doesn't exist
-    'DELETE api/users/${userId}': deleteOne, // is used to delete existing user from database
-    // Server should answer with status code 204 if the record is found and deleted
-    // Server should answer with status code 400 and corresponding message if userId is invalid (not uuid)
-    // Server should answer with status code 404 and corresponding message if record with id === userId doesn't exist
+    'POST api/users': createOne,
+    'PUT api/users/${userId}': updateOne,
+    'DELETE api/users/${userId}': deleteOne,
 };
-
-const FORWARD_SLASH_REGEXP = /\//g;
-const FORWARD_SLASH_PATTERN = '\/';
-
-const escape = (pattern: string) => {
-    return pattern.replace(FORWARD_SLASH_REGEXP, FORWARD_SLASH_PATTERN);
-}
-
-const PLACEHOLDER_REGEXP = /\${.+}/g;
-const PLACEHOLDER_PATTERN = '(.+)';
-
-const generateRegexp = (path: string) => {
-    const escapedPath = escape(path);
-
-    const pattern = escapedPath.replace(PLACEHOLDER_REGEXP, PLACEHOLDER_PATTERN);
-
-    return new RegExp(`\/${pattern}`);
-}
 
 const routes = Object.entries(ROUTES).map(([description, controller]) => {
     const [method, path] = description.split(' ');
 
     return {
         method,
-        regexp: generateRegexp(path),
+        regexp: generateRegexpByPath(path),
         callback: controller,
         priority: path.length,
     }

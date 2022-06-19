@@ -8,8 +8,6 @@ export const getAll: Controller = (request, response) => {
 
     const jsonString = JSON.stringify(users);
 
-    throw new Error('some');
-
     const readable = Readable.from(jsonString);
 
     response.writeHead(200);
